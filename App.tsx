@@ -6,7 +6,7 @@ import tailwind from 'twrnc'
 function App(): React.JSX.Element {
   return (
     <View style={tailwind`flex-1`}>
-      <SafeAreaView style={tailwind`flex-1 bg-slate-800`}>
+      <SafeAreaView style={tailwind`flex-1 bg-slate-950`}>
         <BottomTabNavigation />
       </SafeAreaView>
       <View style={tailwind`h-9 bg-white`} />

@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Activity, Bookmark, Globe, Grid, List, Menu, Plus, PlusSquare, Search, User } from 'react-native-feather';
 import { View } from 'react-native';
 import SearchScreen from '../Screens/Search/SearchScreen'
+import LoginScreen from '../Screens/Authentication/LoginScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -77,7 +78,7 @@ const BottomTabNavigation = () => {
 
         <Tab.Screen
           name="Profile"
-          component={SearchScreen}
+          component={LoginScreen}
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({ focused }) => (
