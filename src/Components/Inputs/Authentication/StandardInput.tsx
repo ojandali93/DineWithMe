@@ -5,7 +5,7 @@ import tailwind from 'twrnc'
 
 const StandardInput = () => {
   return (
-    <View style={tailwind`flex flex-row w-full p-4 bg-stone-100 rounded-3 border-2 border-slate-950`}>
+    <View style={tailwind`flex flex-row w-full p-4 bg-stone-100 rounded-3 border-2 border-stone-400`}>
       <User height={24} width={24} color={'black'} style={tailwind`mr-3`}/>
       <TextInput
         value=''
