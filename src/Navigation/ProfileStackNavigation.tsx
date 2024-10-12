@@ -26,9 +26,9 @@ const ProfileStackNavigation = () => {
       initialRouteName="ProfileScreen"
       screenOptions={{headerShown: false}}>
         <StackNav.Screen name="ProfileScreen" component={ProfileScreen} />
-      <StackNav.Screen name="LoginScreen" component={LoginScreen} />
-      <StackNav.Screen name="SignupScreen" component={SignupScreen} />
-      <StackNav.Screen name="ProfileSetupScreen" component={ProfileSetupScreen} />
+        <StackNav.Screen name="LoginScreen" component={LoginScreen} />
+        <StackNav.Screen name="SignupScreen" component={SignupScreen} />
+        <StackNav.Screen name="ProfileSetupScreen" component={ProfileSetupScreen} />
     </StackNav.Navigator>
   );
 };

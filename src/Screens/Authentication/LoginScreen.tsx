@@ -16,7 +16,7 @@ const LoginScreen = () => {
   const navigation = useNavigation()
 
   const submitUserLogin = () => {
-    loginUser(username, password, navigation)
+    loginUser(username, password, navigation, 'ProfileScreen')
   }
 
   return (

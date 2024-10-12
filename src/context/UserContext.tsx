@@ -3,6 +3,7 @@ import supabase from '../Utils/supabase';
 import { storage } from '../Utils/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Alert } from 'react-native';
+import { useRecipe } from './RecipeContext';
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -35,7 +36,7 @@ interface UserContextType {
   ) => void,
   creatingProfile: boolean,
   loggingIn: boolean,
-  loginUser: (username: string, password: string, navigation: any) => void
+  loginUser: (username: string, password: string, navigation: any, screen: string) => void
 }
 
 interface SingleImageProp {
@@ -44,6 +45,8 @@ interface SingleImageProp {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+
+  const {grabUserRecipes} = useRecipe()
 
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [currentProfile, setCurrentProfile] = useState<any>(null)
@@ -84,8 +87,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.error('Error signing up:', signUpError.message);
         return;
       }
-  
-      // If signup is successful, the user will receive a verification email
       uploadImageToFirebase(username, email, firstName, lastName, profilePic, bio, location, experience, navigation, data.user)
 
       // Optionally insert the user profile in another table if neede
@@ -144,7 +145,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         .from('Profiles')
         .insert([
           {
-            user_id: user.id,  // Make sure this maps to user_id in the DB
+            user_id: user,  // Make sure this maps to user_id in the DB
             username: username.toLowerCase(),
             email: email,
             bio: bio,
@@ -209,7 +210,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   // USER LOGIN FUNCTIONS
   // - takes in username, password, and navigation
 
-  const loginUser = async (username: string, password: string, navigation: any) => {
+  const loginUser = async (username: string, password: string, navigation: any, screen: string) => {
     setLoggingIn(true)
     try {
       const { data, error } = await supabase
@@ -223,7 +224,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         if(data.length === 0){
           Alert.alert('Invaid Username', 'Userame does not match any records')
         } else {
-          loginToAccount(data[0]['email'], username, password, navigation)
+          loginToAccount(data[0]['email'], username, password, navigation, screen)
         }
       }
     } catch (err) {
@@ -231,7 +232,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   }
 
-  const loginToAccount = async (email: string, username: string, password: string, navigation: any) => {
+  const loginToAccount = async (email: string, username: string, password: string, navigation: any, screen: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
@@ -247,7 +248,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           Alert.alert('Login Failed', 'Username or password does not match our records.');
         }
       } else {
-        getUserProfileLogin(username, navigation, data.user)
+        getUserProfileLogin(username, navigation, data.user, screen)
       }
     } catch (err) {
       console.error('Error logging in:', err.message);
@@ -256,7 +257,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const getUserProfileLogin = async (username: string, navigation: any, user: any) => {
+  const getUserProfileLogin = async (username: string, navigation: any, user: any, screen: string) => {
     try {
       const { data, error } = await supabase
         .from('Profiles')
@@ -267,8 +268,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
       setCurrentUser(user)
       setCurrentProfile(data[0])
+      console.log(data[0])
+      grabUserRecipes(data[0].user_id)
       setLoggingIn(false)
-      navigation.navigate('ProfileScreen')
+      navigation.navigate(screen)
     } catch (err) {
       console.error('An error occurred while checking the username:', err);
     }

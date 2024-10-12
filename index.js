@@ -4,12 +4,15 @@ import App from './App';
 import {name as appName} from './app.json';
 import 'react-native-get-random-values';
 import { UserProvider } from './src/Context/UserContext';
+import { RecipeProvider } from './src/Context/RecipeContext';
 
 
 const RootApp = () => (
-  <UserProvider>
-    <App />
-  </UserProvider>
+  <RecipeProvider>
+    <UserProvider>
+      <App />
+    </UserProvider>
+  </RecipeProvider>
 );
 
 AppRegistry.registerComponent(appName, () => RootApp);
