@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ImageBackground, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../Context/UserContext';
 import { BlurView } from '@react-native-community/blur';
@@ -8,9 +8,11 @@ import StandardHeader from '../../Components/Headers/StandardHeader';
 import NameAndImageProfile from '../../Components/Profile/NameAndImageProfile';
 import Bio from '../../Components/Profile/Bio';
 import Summary from '../../Components/Profile/Summary';
+import { useRecipe } from '../../Context/RecipeContext';
 
 const ProfileScreen = () => {
   const { currentProfile } = useUser();
+  const { userRecipes } = useRecipe();
   const navigation = useNavigation();
 
   if (!currentProfile) {
@@ -49,19 +51,46 @@ const ProfileScreen = () => {
             </View>
           </View>
         </View>
-          {/* BlurView */}
       </View>
     );
   }
 
-  // Show profile details if the user is logged in
+  // Render the profile details and recipe grid if the user is logged in
   return (
     <View style={tailwind`flex-1`}>
-      <StandardHeader header={'omar'}/>
+      <StandardHeader header={'omar'} />
       <ScrollView style={tailwind`flex-1 bg-white p-4`}>
-        <NameAndImageProfile username={currentProfile.username} accountName={currentProfile.account_name} profilePicture={currentProfile.profile_picture}/>
+        <NameAndImageProfile 
+          username={currentProfile.username} 
+          accountName={currentProfile.account_name} 
+          profilePicture={currentProfile.profile_picture}
+        />
         <Bio bio={currentProfile.bio} />
-        <Summary followers={currentProfile.following} following={currentProfile.followers} recipes={currentProfile.recipes} lists={currentProfile.lists}/>
+        <Summary 
+          followers={currentProfile.following} 
+          following={currentProfile.followers} 
+          recipes={currentProfile.recipes} 
+          lists={currentProfile.lists}
+        />
+        <View style={tailwind`h-1 w-full bg-stone-200 my-4`}></View>
+
+        {/* Recipe Grid */}
+        <View style={tailwind`flex flex-wrap flex-row`}>
+          {
+            userRecipes.map((recipe, index) => (
+              <TouchableOpacity
+                key={index}
+                style={tailwind`w-1/3 p-1`} // 3-column grid
+                onPress={() => navigation.navigate('SingleRecipeScreen', { recipe })}
+              >
+                <Image
+                  source={{ uri: recipe.main_image }}
+                  style={tailwind`w-full h-32 rounded-lg`}
+                />
+              </TouchableOpacity>
+            ))
+          }
+        </View>
       </ScrollView>
     </View>
   );

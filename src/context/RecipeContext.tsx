@@ -22,12 +22,15 @@ interface RecipeContextType {
   userRecipes: any[],
   grabUserRecipes: (user_id: string) => void,
   followingRecipes: any[],
-  grabUserFollowingRecipes: (user_id: string) => void
+  grabUserFollowingRecipes: (user_id: string) => void,
+  grabSelectedUserRecipes: (user_id: string) => void,
+  selectedUserRecipes: any[]
 }
 
 export const RecipeProvider: React.FC<RecipeProviderProps> = ({ children }) => {
 
   const [userRecipes, setUserRecipes] = useState<any[]>([])
+  const [selectedUserRecipes, setSelectedUserRecipes] = useState<any[]>([])
   const [followingRecipes, setFollowingRecipes] = useState<any[]>([])
 
   const grabUserRecipes = async (user_id: string) => {
@@ -66,6 +69,43 @@ export const RecipeProvider: React.FC<RecipeProviderProps> = ({ children }) => {
       console.error('An error occurred while fetching recipes and profiles:', err);
     }
   };
+
+  const grabSelectedUserRecipes = async (user_id: string) => {
+    try {
+      const { data: recipesData, error: recipesError } = await supabase
+        .from('Recipes')
+        .select(`
+          *,
+          Categories(*),
+          Ingredients(*),
+          Instructions(*),
+          Nutrition(*)
+        `)
+        .eq('user_id', user_id);
+      if (recipesError) {
+        console.error('Error fetching recipes:', recipesError);
+        return;
+      }
+      const recipePromises = recipesData.map(async (recipe) => {
+        const { data: profileData, error: profileError } = await supabase
+          .from('Profiles')
+          .select('*')
+          .eq('user_id', recipe.user_id)
+          .single(); // Since you are expecting a single profile
+        if (profileError) {
+          console.error(`Error fetching profile for user_id: ${recipe.user_id}`, profileError);
+          return { ...recipe, user_profile: null }; // If there's an error, return the recipe without the profile
+        }
+        return { ...recipe, user_profile: profileData }; // Add the profile data to the recipe
+      });
+        const recipesWithProfiles = await Promise.all(recipePromises);
+      console.log('all the users recipes: ', JSON.stringify(recipesWithProfiles))
+      setSelectedUserRecipes(recipesWithProfiles);
+
+    } catch (err) {
+      console.error('An error occurred while fetching recipes and profiles:', err);
+    }
+  };
   
 
   const grabUserFollowingRecipes = (user_id: string) => {
@@ -78,7 +118,9 @@ export const RecipeProvider: React.FC<RecipeProviderProps> = ({ children }) => {
         userRecipes,
         grabUserRecipes,
         followingRecipes,
-        grabUserFollowingRecipes
+        grabUserFollowingRecipes,
+        grabSelectedUserRecipes,
+        selectedUserRecipes
       }}
     >
       {children}

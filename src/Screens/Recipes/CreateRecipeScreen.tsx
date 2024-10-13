@@ -362,6 +362,7 @@ const CreateRecipeScreen = () => {
     <View style={tailwind`flex-1 bg-white`}>
       <StandardHeader 
         header='Add Recipe' 
+        back={true}
       />
       <ScrollView style={tailwind`flex-1 bg-white p-2`}>
         <SelectImageFromGallerySq picture={recipeMainImage} updatePicture={setRecipeMainImage}/>

@@ -51,6 +51,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [currentProfile, setCurrentProfile] = useState<any>(null)
 
+  const [selectedProfile, setSelectedProfile] = useState<any>(null)
+  const [loadingSelectedProfile, setLoadingSelectedProfile] = useState<boolean>(false)
+
   const [creatingProfile, setCreatingProfile] = useState<boolean>(false)
   const [loggingIn, setLoggingIn] = useState<boolean>(false)
 
@@ -285,7 +288,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         createUserAccount,
         creatingProfile,
         loggingIn,
-        loginUser
+        loginUser,
       }}
     >
       {children}
