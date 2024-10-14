@@ -241,10 +241,8 @@ const SingleRecipeScreen: React.FC = () => {
           <Text style={tailwind`font-base`}>{recipe.tip}</Text>
         </View>
         <CategoriesDetails
-          dish={recipe.Categories[0].dish}
-          food={recipe.Categories[0].food}
-          meal={recipe.Categories[0].meal}
-          cuisine={recipe.Categories[0].cuisine}
+          categories={recipe.Categories}
+          cuisine={recipe.Cuisine[0].cuisine}
         />
         <NutritionDetails
           serving_size={recipe.Nutrition[0].serving_size}

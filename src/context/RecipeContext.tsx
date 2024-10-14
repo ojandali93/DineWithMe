@@ -40,6 +40,7 @@ export const RecipeProvider: React.FC<RecipeProviderProps> = ({ children }) => {
         .select(`
           *,
           Categories(*),
+          Cuisine(*),
           Ingredients(*),
           Instructions(*),
           Nutrition(*)

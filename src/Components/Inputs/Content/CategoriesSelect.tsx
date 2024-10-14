@@ -4,13 +4,12 @@ import tailwind from 'twrnc'
 
 interface CategoryProps {
   cuisines: string[],
-  categories?: string,
   categoriesArray?: string[],
   updateCuisine: (data: string) => void,
   header: string
 }
 
-const CategortySelect: React.FC<CategoryProps> = ({ header, categories, cuisines, updateCuisine }) => {
+const CategoriesSelect: React.FC<CategoryProps> = ({ header, categoriesArray, cuisines, updateCuisine }) => {
   return (
     <View style={tailwind`px-2 mt-4`}>
       <Text style={tailwind`text-lg font-bold text-black mb-2`}>{header}</Text>
@@ -21,10 +20,10 @@ const CategortySelect: React.FC<CategoryProps> = ({ header, categories, cuisines
             onPress={() => updateCuisine(cuisine)}
             style={[
               tailwind`p-2 rounded-lg m-1 w-[30%] border border-gray-300`,
-              categories === cuisine ? tailwind`bg-red-500` : tailwind`bg-white`,
+              categoriesArray?.includes(cuisine) ? tailwind`bg-red-500` : tailwind`bg-white`,
             ]}
           >
-            <Text style={tailwind`${categories && categories.includes(cuisine) ? 'text-white' : 'text-black'} text-center`}>
+            <Text style={tailwind`${categoriesArray && categoriesArray.includes(cuisine) ? 'text-white' : 'text-black'} text-center`}>
               {cuisine}
             </Text>
           </TouchableOpacity>
@@ -34,4 +33,4 @@ const CategortySelect: React.FC<CategoryProps> = ({ header, categories, cuisines
   )
 }
 
-export default CategortySelect
+export default CategoriesSelect

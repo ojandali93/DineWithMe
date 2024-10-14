@@ -18,64 +18,8 @@ import { useNavigation } from '@react-navigation/native'
 import InstructionsInput from '../../Components/Inputs/Content/InstructionsInput'
 import NutritionalFacts from '../../Components/Inputs/Content/NutritionalFacts'
 import { useRecipe } from '../../Context/RecipeContext'
-
-const typesOfCuisine = [
-  "Italian",
-  "Chinese",
-  "Mexican",
-  "Indian",
-  "Japanese",
-  "French",
-  "Thai",
-  "Greek",
-  "Spanish",
-  "Lebanese",
-  "Vietnamese",
-  "Turkish",
-  "Korean",
-  "Brazilian",
-  "Caribbean",
-  "Moroccan",
-  "Ethiopian",
-  "American",
-  "Mediterranean",
-  "Peruvian",
-];
-
-const typesOfFood = [
-  "Fast Food",
-  "Street Food",
-  "BBQ",
-  "Seafood",
-  "Vegetarian",
-  "Vegan",
-  "Gluten-Free",
-  "Organic",
-  "Comfort Food",
-  "Healthy",
-  "Baked Goods",
-  "Grilled Food",
-  "Finger Food"
-]
-
-const typesOfMeals = [
-    "Breakfast",
-    "Lunch",
-    "Dinner",
-    "Brunch",
-    "Snack",
-    "Dessert",
-]
-
-const typesOfDishes = [
-  "Appetizers",
-  "Salads",
-  "Soups",
-  "Main Course",
-  "Side Dish",
-  "Beverages",
-]
-
+import {typesOfCuisine, typesOfFood} from '../../Other/RecipesOptions'
+import CategoriesSelect from '../../Components/Inputs/Content/CategoriesSelect'
 
 const CreateRecipeScreen = () => {
 
@@ -96,10 +40,8 @@ const CreateRecipeScreen = () => {
   const [ingredients, setIngredients] = useState<any[]>([])
   const [instructions, setInstructions] = useState<any[]>([])
 
-  const [categories, setCategories] = useState<string>(''); 
-  const [foods, setFoods] = useState<string>(''); 
-  const [meals, setMeals] = useState<string>(''); 
-  const [dishes, setDishes] = useState<string>(''); 
+  const [categories, setCategories] = useState<string[]>([]); 
+  const [cuisine, setCuisine] = useState<string>('')
 
   const [creatingRecipe, setCreatingRecipe] = useState<boolean>(false)
 
@@ -166,6 +108,16 @@ const CreateRecipeScreen = () => {
     setCreatingRecipe(true)
     uploadMainImageToFirebase()
   }
+
+  const handleUpdateCategory = (data: string) => {
+    if (categories.includes(data)) {
+      const updatedCategories = categories.filter((category) => category !== data);
+      setCategories(updatedCategories);
+    } else {
+      setCategories([...categories, data]);
+    }
+  };
+  
 
   const uploadMainImageToFirebase = async () => {
     try {
@@ -321,14 +273,11 @@ const CreateRecipeScreen = () => {
   const addTagsToRecipe = async (recipe_id: number) => {
     try {
       const { data, error } = await supabase
-        .from('Categories')  // Your table name
+        .from('Cuisine')  // Your table name
         .insert([
           {   
             recipe_id: recipe_id, 
             cuisine: categories,
-            meal: meals,
-            dish: dishes,
-            food: foods
           }
         ]);
       if (error) {
@@ -339,24 +288,48 @@ const CreateRecipeScreen = () => {
     } catch (error) {
       console.error('Unexpected error while inserting ingredient:', error);
     }
-    setTitle('')
-    setDescription('')
-    setYieldAmount('')
-    setCookTime('')
-    setPrepTime('')
-    setRecipeMainImage(null)
-    setRecipeMainVidoe(null)
-    setIngredients([])
-    setInstructions([])
-    setTip('')
-    setCategories('')
-    setMeals('')
-    setDishes('')
-    setFoods('')
-    grabUserRecipes(currentProfile.user_id)
-    setCreatingRecipe(false)
-    navigation.navigate('FeedScreen')
+    addCategoriesToRecipe(recipe_id)
   };
+
+  const addCategoriesToRecipe = async (recipe_id: number) => {
+    try {
+      for (const category of categories) {
+        const { data, error } = await supabase
+          .from('Categories')  
+          .insert([
+            {   
+              recipe_id: recipe_id, 
+              category: category, 
+            }
+          ]);
+        if (error) {
+          console.error(`Error inserting category ${category}:`, error);
+          return;
+        } else {
+          console.log(`Category ${category} inserted successfully:`, data);
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected error while inserting categories:', error);
+    }
+    setTitle('');
+    setDescription('');
+    setYieldAmount('');
+    setCookTime('');
+    setPrepTime('');
+    setRecipeMainImage(null);
+    setRecipeMainVidoe(null);
+    setIngredients([]);
+    setInstructions([]);
+    setTip('');
+    setCategories([]);
+    
+    grabUserRecipes(currentProfile.user_id)
+
+    setCreatingRecipe(false);
+    navigation.navigate('FeedScreen');
+  };
+  
  
   return (
     <View style={tailwind`flex-1 bg-white`}>
@@ -406,10 +379,8 @@ const CreateRecipeScreen = () => {
           <Text style={tailwind`text-2xl font-bold`}>Categories</Text>
           <View style={tailwind`w-full h-1 bg-stone-600`}></View>
         </View>
-        <CategortySelect categories={categories} cuisines={typesOfCuisine} updateCuisine={setCategories} header='Cuisine'/>
-        <CategortySelect categories={foods} cuisines={typesOfFood} updateCuisine={setFoods} header='Type'/>
-        <CategortySelect categories={meals} cuisines={typesOfMeals} updateCuisine={setMeals} header='Meal'/>
-        <CategortySelect categories={dishes} cuisines={typesOfDishes} updateCuisine={setDishes} header='Dishes'/>
+        <CategoriesSelect categoriesArray={categories} cuisines={typesOfFood} updateCuisine={handleUpdateCategory} header='Categories'/>
+        <CategortySelect categories={cuisine} cuisines={typesOfCuisine} updateCuisine={setCuisine} header='Cuisine'/>
         <View style={tailwind`mt-4`}>
           <MainButton header='Create Recipe' clickButton={createRecipe} loading={creatingRecipe}/>
         </View>

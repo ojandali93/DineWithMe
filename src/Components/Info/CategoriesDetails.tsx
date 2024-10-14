@@ -3,36 +3,22 @@ import { Text, View } from 'react-native'
 import tailwind from 'twrnc'
 
 interface RecipeDetailsProps {
-  dish: string,
-  food: string,
-  meal: string,
+  categories: any[],
   cuisine: string,
 }
 
-const CategoriesDetails: React.FC<RecipeDetailsProps> = ({dish, food, meal, cuisine}) => {
+const CategoriesDetails: React.FC<RecipeDetailsProps> = ({ categories, cuisine }) => {
+
+  // Create a comma-separated list of categories
+  const categoryList = categories?.map((cat: any) => cat.category).join(', ');
+
   return (
     <View style={tailwind``}>
       {
-        dish
+        categories && categories.length > 0
           ? <View style={tailwind`w-full flex flex-row justify-between items-center`}>
-              <Text style={tailwind`text-base font-semibold`}>Dish:</Text>
-              <Text style={tailwind`text-base font-semibold`}>{dish}</Text>
-            </View>
-          : null
-      }
-      {
-        food
-          ? <View style={tailwind`w-full flex flex-row justify-between items-center`}>
-              <Text style={tailwind`text-base font-semibold`}>Food:</Text>
-              <Text style={tailwind`text-base font-semibold`}>{food}</Text>
-            </View>
-          : null
-      }
-      {
-        meal
-          ? <View style={tailwind`w-full flex flex-row justify-between items-center`}>
-              <Text style={tailwind`text-base font-semibold`}>Meal:</Text>
-              <Text style={tailwind`text-base font-semibold`}>{meal}</Text>
+              <Text style={tailwind`text-base font-semibold`}>Categories:</Text>
+              <Text style={tailwind`text-base font-semibold`}>{categoryList}</Text>
             </View>
           : null
       }
