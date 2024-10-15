@@ -8,6 +8,8 @@ import LoginScreen from '../Screens/Authentication/LoginScreen';
 import AuthStackNavigation from './AuthStackNavigation';
 import ProfileStackNavigation from './ProfileStackNavigation';
 import FeedStackNavigation from './FeedStackNavigation';
+import ExploreScreen from '../Screens/Explore/ExploreScreen';
+import ExploreStackNavigation from './ExploreStackNavigation';
 
 const Tab = createBottomTabNavigator();
 
@@ -67,7 +69,7 @@ const BottomTabNavigation = () => {
 
         <Tab.Screen
           name="Explore"
-          component={SearchScreen}
+          component={ExploreStackNavigation}
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({ focused }) => (
