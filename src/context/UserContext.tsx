@@ -1,9 +1,11 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect, useRef } from 'react';
 import supabase from '../Utils/supabase';
-import { storage } from '../Utils/firebaseConfig';
+import { messaging, storage } from '../Utils/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useRecipe } from './RecipeContext';
+import { getToken } from 'firebase/messaging';
+import { check, checkNotifications, PERMISSIONS, requestNotifications } from 'react-native-permissions';
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -37,6 +39,26 @@ interface UserContextType {
   creatingProfile: boolean,
   loggingIn: boolean,
   loginUser: (username: string, password: string, navigation: any, screen: string) => void
+  getUserLists: (user_id: string) => void,
+  userLists: any[],
+  getListRecipes: (list_id: number) => void
+  listRecipes: any[]
+  selectedUserLists: any[], 
+  getSelectedUserLists: (user_id: string) => void
+  userFollowing: any[],
+  getUserFollowing: (user_id: string) => void
+  userFollowers: any[],
+  getUserFollowers: (user_id: string) => void
+  selectedUserFollowing: any[],
+  getSelectedUserFollowing: (user_id: string) => void,
+  selectedUserFollowers: any[],
+  getSelectedUserFollowers: (user_id: string) => void
+  userFavorites: any[],
+  grabUserFavorites: (user_id: string) => void,
+  addToFavorite: (user_id: string, recipe_id: number) => void,
+  removeFromFavorite: (favorite: string, user_id: string) => void
+  logoutCurrentUser: (navigation: any) => void
+  userBlocked: any[]
 }
 
 interface SingleImageProp {
@@ -56,6 +78,20 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const [creatingProfile, setCreatingProfile] = useState<boolean>(false)
   const [loggingIn, setLoggingIn] = useState<boolean>(false)
+
+  const [userLists, setUserLists] = useState<any[]>([])
+  const [listRecipes, setListRecipes] = useState<any[]>([])
+
+  const [selectedUserLists, setSelectedUserLists] = useState<any[]>([])
+
+  const [userFollowing, setUserFollowing] = useState<any[]>([])
+  const [userFollowers, setUserFollowers] = useState<any[]>([])
+
+  const [selectedUserFollowing, setSelectedUserFollowing] = useState<any[]>([])
+  const [selectedUserFollowers, setSelectedUserFollowers] = useState<any[]>([])
+
+  const [userFavorites, setUserFavorites] = useState<any[]>([])
+  const [userBlocked, setUserBlocked] = useState<any[]>([])
 
   // CREATING NEW USER FUNCTIONS
   // - takes in several fields
@@ -260,6 +296,24 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const logoutCurrentUser = async (navigation: any) => {
+    console.log('logout user')
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error logging out:', error.message);
+        return false;
+      }
+      setCurrentProfile(null)
+      navigation.navigate('ProfileScreen')
+      console.log('Successfully logged out');
+      return true;
+    } catch (err) {
+      console.error('Unexpected error logging out:', err);
+      return false;
+    }
+  };
+
   const getUserProfileLogin = async (username: string, navigation: any, user: any, screen: string) => {
     try {
       const { data, error } = await supabase
@@ -271,14 +325,242 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
       setCurrentUser(user)
       setCurrentProfile(data[0])
-      console.log(data[0])
       grabUserRecipes(data[0].user_id)
+      getUserLists(data[0].user_id)
+      getUserFollowing(data[0].user_id)
+      getUserFollowers(data[0].user_id)
+      grabUserFavorites(data[0].user_id)
+      getUserBlocked(data[0].user_id)
       setLoggingIn(false)
       navigation.navigate(screen)
     } catch (err) {
       console.error('An error occurred while checking the username:', err);
     }
   }
+
+  const getUserLists = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Collections')
+        .select('*')
+        .eq('user_id', user_id); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setUserLists(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const getUserBlocked = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Relations')
+        .select(`
+          *, 
+          Profiles(*)
+        `)
+        .eq('follower', user_id)
+        .eq('status', 'blocked'); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      console.log('all of the blocked users: ', JSON.stringify(collectionsData))
+      setUserBlocked(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const getUserFollowing = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Relations')
+        .select(`
+          *, 
+          Profiles(*)
+        `)
+        .eq('follower', user_id); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setUserFollowing(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const getUserFollowers = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Relations')
+        .select(`
+          *, 
+          Profiles(*)
+        `)
+        .eq('following', user_id); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setUserFollowers(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const getSelectedUserFollowing = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Relations')
+        .select(`
+          *, 
+          Profiles(*)
+        `)
+        .eq('follower', user_id); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setSelectedUserFollowing(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const getSelectedUserFollowers = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Relations')
+        .select(`
+          *, 
+          Profiles(*)
+        `)
+        .eq('following', user_id); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setSelectedUserFollowers(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+  
+  const getListRecipes = async (list_id: number) => {
+    try {
+      // Step 1: Fetch all records from CollectionPlaces where collection_id matches
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('CollectionPlaces')
+        .select('recipe_id')
+        .eq('collection_id', list_id);
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      if (collectionsData.length === 0) {
+        return;
+      }
+      const recipePromises = collectionsData.map(async (collectionPlace) => {
+        const { recipe_id } = collectionPlace;
+        const { data: recipeData, error: recipeError } = await supabase
+          .from('Recipes')
+          .select(`
+            *,
+            Categories(*),
+            Cuisine(*),
+            Ingredients(*),
+            Instructions(*),
+            Nutrition(*)
+          `)
+          .eq('id', recipe_id)
+          .single();  
+        if (recipeError) {
+          console.error(`Error fetching recipe with id: ${recipe_id}`, recipeError);
+          return null;
+        }
+        return recipeData;  // Return the recipe data
+      });
+      const recipes = await Promise.all(recipePromises);
+      const filteredRecipes = recipes.filter((recipe) => recipe !== null);
+      setListRecipes(filteredRecipes);
+    } catch (err) {
+      console.error('An error occurred while fetching list recipes:', err);
+    }
+  };
+
+  const getSelectedUserLists = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Collections')
+        .select('*')
+        .eq('user_id', user_id); 
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setSelectedUserLists(collectionsData);
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const grabUserFavorites = async (user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Favorites')
+        .select('*, Recipes(*)')
+        .eq('user_id', user_id)
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      setUserFavorites(collectionsData)
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const addToFavorite = async (user_id: string, recipe_id: number) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Favorites')
+        .insert([
+          {
+            user_id: user_id,
+            recipe_id: recipe_id
+          }
+        ])
+        .select()
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      grabUserFavorites(user_id)
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
+
+  const removeFromFavorite = async (favorite: string, user_id: string) => {
+    try {
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('Favorites')
+        .delete()
+        .eq('id', favorite);
+      if (collectionsError) {
+        console.error('Error fetching collections:', collectionsError);
+        return;
+      }
+      grabUserFavorites(user_id)
+    } catch (err) {
+      console.error('An error occurred while fetching user lists and recipes:', err);
+    }
+  };
   
   return (
     <UserContext.Provider
@@ -289,6 +571,26 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         creatingProfile,
         loggingIn,
         loginUser,
+        getUserLists,
+        userLists,
+        getListRecipes,
+        listRecipes,
+        selectedUserLists, 
+        getSelectedUserLists,
+        userFollowing,
+        getUserFollowing,
+        userFollowers,
+        getUserFollowers,
+        selectedUserFollowing,
+        getSelectedUserFollowing,
+        selectedUserFollowers,
+        getSelectedUserFollowers,
+        userFavorites,
+        grabUserFavorites,
+        addToFavorite,
+        removeFromFavorite,
+        logoutCurrentUser,
+        userBlocked
       }}
     >
       {children}

@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import { Image, TouchableOpacity, View } from 'react-native'
-import { Pause, Play } from 'react-native-feather'
+import { Maximize, Minimize, Pause, Play } from 'react-native-feather'
 import Video from 'react-native-video'
 import tailwind from 'twrnc'
 
 interface DispayImageProps {
-  video: string
+  video: string,
+  maximize: () => void,
 }
 
-const DisplayVideoRecipe: React.FC<DispayImageProps> = ({video}) => {
+const DisplayVideoRecipe: React.FC<DispayImageProps> = ({video, maximize}) => {
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [loadingVideo, setLoadingVideo] = useState<boolean>(false)
@@ -24,21 +25,25 @@ const DisplayVideoRecipe: React.FC<DispayImageProps> = ({video}) => {
         onLoad={() => setLoadingVideo(false)}
         onError={(e) => console.log('Video error:', e)}
       />
-      <TouchableOpacity
-        onPress={() => {setIsPlaying(!isPlaying)}}
-        style={tailwind`absolute w-full h-full flex justify-center items-center`}
-      >
-        {isPlaying 
-          ? (
-            <View style={tailwind`h-16 w-16 bg-slate-600 rounded-full flex justify-center items-center`}>
-              <Pause height={30} width={30} color={'white'} />
-            </View>
-        ) : (
-          <View style={tailwind`h-16 w-16 bg-slate-600 rounded-full flex justify-center items-center`}>
-            <Play height={30} width={30} color={'white'} />
-          </View>
-        )}
-      </TouchableOpacity>
+      <View style={tailwind`absolute z-10 w-full h-full flex justify-between`}>
+        <TouchableOpacity onPress={maximize} style={tailwind`w-full flex flex-row justify-end p-4`}>
+          <Maximize height={28} width={28} color={'white'}/>
+        </TouchableOpacity>
+        <View style={tailwind`w-full flex flex-row justify-center opacity-50 mb-16`}>
+          {isPlaying 
+            ? (
+              <TouchableOpacity onPress={() => setIsPlaying(!isPlaying)} style={tailwind`h-16 w-16 bg-slate-600 rounded-full flex justify-center items-center`}>
+                <Pause height={30} width={30} color={'white'} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => setIsPlaying(!isPlaying)} style={tailwind`h-16 w-16 bg-slate-600 rounded-full flex justify-center items-center`}>
+                <Play height={30} width={30} color={'white'} />
+              </TouchableOpacity>
+            )
+          }
+        </View>
+        <View></View>
+      </View>
     </View>
   )
 }

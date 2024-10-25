@@ -40,7 +40,6 @@ const ExploreScreen: React.FC = () => {
         console.error('Error fetching profiles:', error);
         return;
       }
-      console.log(data.length)
       setSearchResults(data); // Update the state with the fetched profiles
     } catch (err) {
       console.error('Unexpected error during profile search:', err);

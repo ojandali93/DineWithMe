@@ -22,7 +22,6 @@ const generateRandomRecipe = (index) => {
 
 // Function to load 15 recipes into the database
 const loadRecipes = async () => {
-  console.log('Starting to load recipes into the database...');
   const recipes = [];
   
   for (let i = 1; i <= 15; i++) {
@@ -37,7 +36,6 @@ const loadRecipes = async () => {
     if (error) {
       console.error('Error inserting recipes:', error);
     } else {
-      console.log('Recipes inserted successfully:', data);
     }
   } catch (error) {
     console.error('An error occurred while inserting recipes:', error);

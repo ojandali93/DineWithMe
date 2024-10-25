@@ -13,7 +13,7 @@ interface CategoryProps {
 const CategortySelect: React.FC<CategoryProps> = ({ header, categories, cuisines, updateCuisine }) => {
   return (
     <View style={tailwind`px-2 mt-4`}>
-      <Text style={tailwind`text-lg font-bold text-black mb-2`}>{header}</Text>
+      <Text style={tailwind`text-lg font-bold text-black mb-2`}>{header}<Text style={tailwind`text-red-500 text-base`}>*</Text> (1 selection required)</Text>
       <View style={tailwind`flex flex-row flex-wrap`}>
         {cuisines.map((cuisine, index) => (
           <TouchableOpacity

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native'
-import { Camera, Pause, Play, Plus, RefreshCw, X, Video as VideoIcon } from 'react-native-feather'
+import { Camera, Pause, Play, Plus, RefreshCw, X, Video as VideoIcon, ChevronRight, Maximize } from 'react-native-feather'
 import { launchImageLibrary } from 'react-native-image-picker'
 import Video from 'react-native-video'
 import tailwind from 'twrnc'
@@ -8,18 +8,17 @@ import tailwind from 'twrnc'
 interface SelectImageProps {
   video: any,
   updateVideo: (data: any) => void
+  maximize: () => void
 }
 
-const SelectVideoFromGallerySq: React.FC<SelectImageProps> = ({video, updateVideo}) => {
+const SelectVideoFromGallerySq: React.FC<SelectImageProps> = ({video, updateVideo, maximize}) => {
 
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(false)
 
   const selectImage = () => {
     launchImageLibrary({ mediaType: 'video', }, (response) => {
       if (response.didCancel) {
-        console.log('Image selection cancelled');
       } else if (response.errorCode) {
-        console.log('Error picking image: ', response.errorCode);
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
 
@@ -31,7 +30,6 @@ const SelectVideoFromGallerySq: React.FC<SelectImageProps> = ({video, updateVide
             uri: asset.uri,
             fileType: asset.type
           };
-          console.log('Selected media content: ', selectedFile);
           updateVideo(selectedFile)
         }
       }
@@ -39,13 +37,22 @@ const SelectVideoFromGallerySq: React.FC<SelectImageProps> = ({video, updateVide
   }
 
   return (
-    <View style={tailwind`mt-8`}>
+    <View style={tailwind`mt-4`}>
       {
         video && video.uri
-          ? <View style={tailwind`w-full h-80 bg-stone-300 rounded-2`}>
+          ? <View style={tailwind`w-full bg-stone-300 rounded-2`}>
+            <TouchableOpacity onPress={selectImage} style={tailwind`w-full bg-stone-300 rounded-2 flex flex-row items-center justify-between py-3 px-4`}>
+                <View style={tailwind`flex flex-row items-center`}>
+                  <Camera height={28} width={28} color={'black'}/>
+                  <Text style={tailwind`ml-3 text-base font-semibold`}>Select Main Video</Text>
+                </View>
+                <View>
+                  <ChevronRight height={28} width={28} color={'black'}/>
+                </View>
+              </TouchableOpacity>
               <Video
                 source={{ uri: video.uri }} // Ensure video_url exists and is valid
-                style={tailwind`flex-1 rounded-2 overflow-hidden`}
+                style={tailwind`w-full h-92 rounded-2 overflow-hidden`}
                 paused={!isVideoPlaying} // Control video play/pause
                 resizeMode="cover"
                 onError={(error: any) => console.log('Video error:', error)} // Handle error
@@ -53,13 +60,13 @@ const SelectVideoFromGallerySq: React.FC<SelectImageProps> = ({video, updateVide
                 volume={1.0}
                 ignoreSilentSwitch="ignore"
               />
-              <View style={tailwind`absolute z-10 flex-1 top-0 bottom-0 left-0 right-0 p-4 flex justify-between`}>
+              <View style={tailwind`absolute z-10 flex-1 top-12 bottom-0 left-0 right-0 p-4 flex justify-between`}>
                 <View style={tailwind`flex flex-row justify-between`}>
                   <TouchableOpacity onPress={() => {updateVideo(null)}} style={tailwind`h-10 w-10 bg-stone-400 rounded-full flex justify-center items-center opacity-80`}>
                     <X height={20} width={20} color={'white'}/>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={selectImage} style={tailwind`h-10 w-10 bg-stone-400 rounded-full flex justify-center items-center opacity-80`}>
-                    <RefreshCw height={20} width={20} color={'white'}/>
+                  <TouchableOpacity onPress={maximize} style={tailwind`h-10 w-10 bg-stone-400 rounded-full flex justify-center items-center opacity-80`}>
+                    <Maximize height={20} width={20} color={'white'}/>
                   </TouchableOpacity>
                 </View>
                 <View style={tailwind`w-full flex flex-row justify-center`}>
@@ -74,9 +81,14 @@ const SelectVideoFromGallerySq: React.FC<SelectImageProps> = ({video, updateVide
                 <View></View>
               </View>
             </View>
-          : <TouchableOpacity onPress={selectImage} style={tailwind`w-full h-80 bg-stone-300 rounded-2 flex justify-center items-center`}>
-              <VideoIcon height={28} width={28} color={'black'}/>
-              <Text style={tailwind`mt-3`}>Select Main Video</Text>
+          : <TouchableOpacity onPress={selectImage} style={tailwind`w-full bg-stone-300 rounded-2 flex flex-row items-center justify-between py-3 px-4`}>
+              <View style={tailwind`flex flex-row items-center`}>
+                <Camera height={28} width={28} color={'black'}/>
+                <Text style={tailwind`ml-3 text-base font-semibold`}>Select Main Video</Text>
+              </View>
+              <View>
+                <ChevronRight height={28} width={28} color={'black'}/>
+              </View>
             </TouchableOpacity>
       }
     </View>

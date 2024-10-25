@@ -16,7 +16,6 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({searchTerm, changeSeearchTer
 
   const navigation = useNavigation()
 
-  console.log('component count: ', searchResults.length)
   return (
     <View style={tailwind`w-full bg-slate-950 rounded-bl-5 rounded-br-5 pb-4`}>
       <View style={tailwind`mt-2 flex flex-row items-center px-4`}>
@@ -38,9 +37,8 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({searchTerm, changeSeearchTer
           ? <ScrollView style={tailwind`w-full h-full`}>
               {
                 searchResults.map((item) => {
-                  console.log('item: ', item)
                   return(
-                    <TouchableOpacity onPress={() => navigation.navigate('SelectedProfileScreenExplore', {user_id: item.user_id})} key={item.id} style={tailwind`w-full flex flex-row items-center py-3 border-b-2 border-b-slate-600 px-4`}>
+                    <TouchableOpacity onPress={() => navigation.navigate('SelectedProfileScreen', {user_id: item.user_id})} key={item.id} style={tailwind`w-full flex flex-row items-center py-3 border-b-2 border-b-slate-600 px-4`}>
                       <View style={tailwind`h-12 w-12`}>
                         <Image style={tailwind`flex-1 rounded-full`} source={{uri: item.profile_picture}}/>
                       </View>

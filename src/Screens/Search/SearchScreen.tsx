@@ -21,6 +21,7 @@ const SearchScreen = () => {
         .select(`
           *,
           Categories(*),
+          Cuisine(*),
           Ingredients(*),
           Instructions(*),
           Nutrition(*)
@@ -69,6 +70,7 @@ const SearchScreen = () => {
         .select(`
           *,
           Categories(*),
+          Cuisine(*),
           Ingredients(*),
           Instructions(*),
           Nutrition(*)
@@ -111,7 +113,6 @@ const SearchScreen = () => {
   };
 
   const searchRecipeCategory = async (category: string) => {
-    console.log(category);
     setText(category)
     setFeaturedRecipes([]);
     try {
@@ -210,7 +211,7 @@ const SearchScreen = () => {
             horizontal
             renderItem={({item, index}) => {
               return(
-                <TouchableOpacity onPress={() => {searchRecipeCategory(item.value)}} key={index} style={tailwind`py-2 px-3 bg-white mr-2 rounded-2`}>
+                <TouchableOpacity onPress={() => {searchRecipeCategory(item.value)}} key={index} style={tailwind`py-2 px-3 bg-white mr-2 rounded-full`}>
                   <Text style={tailwind`text-black`}>{item.value}</Text>
                 </TouchableOpacity>
               )

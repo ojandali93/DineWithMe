@@ -69,9 +69,7 @@ const ProfileSetupScreen = () => {
   const selectAnImage = () => {
     launchImageLibrary({ mediaType: 'mixed' }, (response) => {
       if (response.didCancel) {
-        console.log('Image selection cancelled');
       } else if (response.errorCode) {
-        console.log('Error picking image: ', response.errorCode);
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
 
@@ -83,7 +81,6 @@ const ProfileSetupScreen = () => {
             uri: asset.uri,
             fileType: asset.type,
           };
-          console.log('Selected media content: ', selectedFile);
           setProfilePicture(selectedFile)
         }
       }

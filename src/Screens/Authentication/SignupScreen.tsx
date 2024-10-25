@@ -8,6 +8,7 @@ import { useUser } from '../../Context/UserContext';
 import { useNavigation } from '@react-navigation/native';
 import FixedTopLogin from '../../Components/Authentication/FixedTopLogin';
 import supabase from '../../Utils/supabase';
+import { Heart } from 'react-native-feather';
 
 const SignupScreen = () => {
 
@@ -29,9 +30,6 @@ const SignupScreen = () => {
   const navigation = useNavigation()
 
   const submitUserLogin = () => {
-    console.log('valid username: ', validUsername)
-    console.log('valid password: ', validUsername)
-    console.log('valid verify: ', validPasswordAndVerify)
     validUsername && validPassword && validPasswordAndVerify && username.length > 0
       ? navigation.navigate('ProfileSetupScreen', {
                                                     username, 
@@ -70,7 +68,6 @@ const SignupScreen = () => {
 
   const checkValidUsername = async (username: string) => {
     setLoadingUsernameSearch(true)
-    console.log('passed in username: ', username);
     try {
       const { data, error } = await supabase
         .from('Profiles')
@@ -221,7 +218,7 @@ const SignupScreen = () => {
 
           {/* Login Button */}
           <View style={tailwind`mt-4`}>
-            <RedButton submit={submitUserLogin}/>
+            <RedButton loading={false} submit={submitUserLogin}/>
           </View>
 
           {/* Create Account Link */}

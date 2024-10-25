@@ -63,7 +63,6 @@ export const RecipeProvider: React.FC<RecipeProviderProps> = ({ children }) => {
         return { ...recipe, user_profile: profileData }; // Add the profile data to the recipe
       });
         const recipesWithProfiles = await Promise.all(recipePromises);
-      console.log('all the users recipes: ', JSON.stringify(recipesWithProfiles))
       setUserRecipes(recipesWithProfiles);
 
     } catch (err) {
@@ -100,7 +99,6 @@ export const RecipeProvider: React.FC<RecipeProviderProps> = ({ children }) => {
         return { ...recipe, user_profile: profileData }; // Add the profile data to the recipe
       });
         const recipesWithProfiles = await Promise.all(recipePromises);
-      console.log('all the users recipes: ', JSON.stringify(recipesWithProfiles))
       setSelectedUserRecipes(recipesWithProfiles);
 
     } catch (err) {

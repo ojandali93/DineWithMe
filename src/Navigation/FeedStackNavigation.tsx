@@ -8,6 +8,8 @@ import CreateRecipeScreen from '../Screens/Recipes/CreateRecipeScreen';
 import SingleRecipeScreen from '../Screens/Recipes/SingleRecipeScreen';
 import ProfileScreen from '../Screens/Profile/ProfileScreen';
 import SelectedProfileScreen from '../Screens/Profile/SelectedProfileScreen';
+import AddRecipeToList from '../Screens/Recipes/AddRecipeToList';
+import FavoritesScreen from '../Screens/Feed/FavoritesScreen';
 
 export type FeedStackParamList = {
   FeedScreen: undefined;
@@ -16,7 +18,9 @@ export type FeedStackParamList = {
   LoginScreenFeed: undefined;
   SignupScreenFeed: undefined;
   ProfileSetupScreenFeed: undefined;
-  SelectedProfileScreenFeed: {user_id: string};
+  SelectedProfileScreen: {user_id: string};
+  AddRecipeToList: {recipe_id: number};
+  FavoritesScreen: undefined;
 };
 
 const StackNav = createStackNavigator<FeedStackParamList>();
@@ -29,10 +33,12 @@ const FeedStackNavigation = () => {
         <StackNav.Screen name="FeedScreen" component={FeedScreen} />
         <StackNav.Screen name="SingleRecipeScreen" component={SingleRecipeScreen} />
         <StackNav.Screen name="CreateRecipeScreen" component={CreateRecipeScreen} />
+        <StackNav.Screen name="AddRecipeToList" component={AddRecipeToList} />
         <StackNav.Screen name="LoginScreenFeed" component={LoginScreen} />
         <StackNav.Screen name="SignupScreenFeed" component={SignupScreen} />
         <StackNav.Screen name="ProfileSetupScreenFeed" component={ProfileSetupScreen} />
-        <StackNav.Screen name="SelectedProfileScreenFeed" component={SelectedProfileScreen} />
+        <StackNav.Screen name="SelectedProfileScreen" component={SelectedProfileScreen} />
+        <StackNav.Screen name="FavoritesScreen" component={FavoritesScreen} />
     </StackNav.Navigator>
   );
 };

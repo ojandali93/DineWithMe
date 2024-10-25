@@ -24,7 +24,7 @@ const MultipleInputs: React.FC<IngredientInputProps> = ({
       {items.map((item, index) => (
         <View key={item.id} style={tailwind`w-full flex flex-row justify-center mb-2`}>
           <View style={tailwind`w-full flex flex-row items-center mt-2`}>
-            <Text style={tailwind`text-base font-bold mr-2`}>{index + 1}.</Text>
+            <Text style={tailwind`text-base font-bold mr-2`}>{index + 1}.{index === 0 ? <Text style={tailwind`text-red-500`}>*</Text> : null}</Text>
             
             {/* Quantity Input */}
             <TextInput

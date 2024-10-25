@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Dimensions, FlatList, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import tailwind from 'twrnc'
 import StandardHeader from '../../Components/Headers/StandardHeader'
 import SelectImageFromGallerySq from '../../Components/ImagesAndVideo/SelectImageFromGallerySq'
@@ -20,10 +20,13 @@ import NutritionalFacts from '../../Components/Inputs/Content/NutritionalFacts'
 import { useRecipe } from '../../Context/RecipeContext'
 import {typesOfCuisine, typesOfFood} from '../../Other/RecipesOptions'
 import CategoriesSelect from '../../Components/Inputs/Content/CategoriesSelect'
+import { Check, Minimize, Play } from 'react-native-feather'
+import Video from 'react-native-video'
+import CategoriesDetails from '../../Components/Info/CategoriesDetails';
 
 const CreateRecipeScreen = () => {
 
-  const {currentProfile} = useUser()
+  const {currentProfile, userLists} = useUser()
   const {grabUserRecipes} = useRecipe()
   const navigation = useNavigation()
 
@@ -37,13 +40,28 @@ const CreateRecipeScreen = () => {
   const [cookTime, setCookTime] = useState<string>('')
   const [tip, setTip] = useState<string>('')
 
-  const [ingredients, setIngredients] = useState<any[]>([])
-  const [instructions, setInstructions] = useState<any[]>([])
+  const [ingredients, setIngredients] = useState<any[]>([{ id: generateRandomCode(), amount: '', item: ''}])
+  const [instructions, setInstructions] = useState<any[]>([{ id: generateRandomCode(), item: '' }])
 
   const [categories, setCategories] = useState<string[]>([]); 
   const [cuisine, setCuisine] = useState<string>('')
 
   const [creatingRecipe, setCreatingRecipe] = useState<boolean>(false)
+  
+  const [showCollections, setShowCollections] = useState<boolean>(false)
+  const [addToLists, setAddToLists] = useState<number[]>([])
+
+  const [maximizeVideo, setMaximizeVideo] = useState<boolean>(false)
+
+  const toggleSelectList = (listId: number) => {
+    if(addToLists.includes(listId)){
+
+    } else {
+      setAddToLists((prev) => [...prev, listId])
+    }
+  };
+
+  const screenHeight = Dimensions.get('window').height; // Get screen height
 
   const [nutritionalFacts, setNutritionalFacts] = useState<any>({
     servingSize: '',
@@ -76,8 +94,10 @@ const CreateRecipeScreen = () => {
   };
 
   const removeIngredientInput = (id: string) => {
-    const updatedIngredients = ingredients.filter((ingredient) => ingredient.id !== id);
-    setIngredients(updatedIngredients);
+    if(ingredients.length > 1){
+      const updatedIngredients = ingredients.filter((ingredient) => ingredient.id !== id);
+      setIngredients(updatedIngredients);
+    }
   };
 
   const addInstruction = () => {
@@ -93,8 +113,10 @@ const CreateRecipeScreen = () => {
   };
 
   const removeInstruction = (id: string) => {
-    const uppdatedInstructions = instructions.filter((instruction) => instruction.id !== id);
-    setInstructions(uppdatedInstructions);
+    if(instructions.length > 1){
+      const uppdatedInstructions = instructions.filter((instruction) => instruction.id !== id);
+      setInstructions(uppdatedInstructions);
+    }
   };
 
   const handleNutritionalFactsChange = (key: string, value: string) => {
@@ -105,8 +127,24 @@ const CreateRecipeScreen = () => {
   };
 
   const createRecipe = () => {
-    setCreatingRecipe(true)
-    uploadMainImageToFirebase()
+    if(
+      title.length === 0 || 
+      description.length === 0 ||
+      yieldAmount.length === 0 ||
+      prepTime.length === 0 ||
+      cookTime.length === 0 ||
+      recipeMainImage === null ||
+      ingredients[0].amount.length === 0 ||
+      ingredients[0].item.length === 0 ||
+      instructions[0].item.length === 0 ||
+      categories.length === 0 ||
+      cuisine.length === 0
+    ){
+      Alert.alert('Required Fields', 'You are missing one or more required field. Please check and resubmit')
+    } else {
+      setCreatingRecipe(true)
+      uploadMainImageToFirebase()
+    }
   }
 
   const handleUpdateCategory = (data: string) => {
@@ -123,11 +161,10 @@ const CreateRecipeScreen = () => {
     try {
       const folderName = 'Recipe_Pictures'; 
       const response = await fetch(recipeMainImage.uri!);
-      const blob = await response.blob();
+      const blob = await response.blob();  
       const storageRef = ref(storage, `${folderName}/${blob.data.name}`);
       const snapshot = await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log('Downloadable URL (Image):', downloadURL);
       if(recipeMainVideo === null){
           addRecipeDetailsToDatabase(downloadURL, null)
         } else {
@@ -150,7 +187,6 @@ const CreateRecipeScreen = () => {
       const storageRef = ref(storage, fileKey);
       const snapshot = await uploadBytesResumable(storageRef, blob);
       const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log('Downloadable URL:', downloadURL);
       addRecipeDetailsToDatabase(imageUrl, downloadURL);
     } catch (error) {
       console.error('Error uploading video tutorial:', error);
@@ -206,7 +242,6 @@ const CreateRecipeScreen = () => {
         if (error) {
           console.error('Error inserting ingredient:', error);
         } else {
-          console.log('Ingredient inserted successfully:', data);
         }
       } catch (error) {
         console.error('Unexpected error while inserting ingredient:', error);
@@ -230,7 +265,6 @@ const CreateRecipeScreen = () => {
         if (error) {
           console.error('Error inserting instruction:', error);
         } else {
-          console.log('Instruction inserted successfully:', data);
         }
       } catch (error) {
         console.error('Unexpected error while inserting ingredient:', error);
@@ -262,7 +296,6 @@ const CreateRecipeScreen = () => {
       if (error) {
         console.error('Error inserting instruction:', error);
       } else {
-        console.log('Instruction inserted successfully:', data);
       }
     } catch (error) {
       console.error('Unexpected error while inserting ingredient:', error);
@@ -283,7 +316,6 @@ const CreateRecipeScreen = () => {
       if (error) {
         console.error('Error inserting instruction:', error);
       } else {
-        console.log('Instruction inserted successfully:', data);
       }
     } catch (error) {
       console.error('Unexpected error while inserting ingredient:', error);
@@ -306,7 +338,6 @@ const CreateRecipeScreen = () => {
           console.error(`Error inserting category ${category}:`, error);
           return;
         } else {
-          console.log(`Category ${category} inserted successfully:`, data);
         }
       }
     } catch (error) {
@@ -327,7 +358,15 @@ const CreateRecipeScreen = () => {
     grabUserRecipes(currentProfile.user_id)
 
     setCreatingRecipe(false);
-    navigation.navigate('FeedScreen');
+    navigation.navigate('AddRecipeToList', {recipe_id: recipe_id});
+  };
+
+
+  const limitStringSize = (str: string, maxLength: number) => {
+    if (str.length > maxLength) {
+      return str.substring(0, maxLength) + '...';
+    }
+    return str;
   };
   
  
@@ -338,23 +377,27 @@ const CreateRecipeScreen = () => {
         back={true}
       />
       <ScrollView style={tailwind`flex-1 bg-white p-2`}>
-        <SelectImageFromGallerySq picture={recipeMainImage} updatePicture={setRecipeMainImage}/>
-        <View style={tailwind`mt-4 rounded-full`}>
+        <View style={tailwind`rounded-full`}>
           <Text style={tailwind`text-2xl font-bold`}>Details</Text>
           <View style={tailwind`w-full h-1 bg-stone-600`}></View>
         </View>
-        <RecipeInput header='Title:' value={title} updateInput={setTitle} capitalize='none' multi={false} placeholder='recipe title...'/>
-        <RecipeInput header='Description:' value={description} updateInput={setDescription} capitalize='none' multi={true} placeholder='recipe description...'/>
-        <RecipeInput header='Yield:' value={yieldAmount} updateInput={setYieldAmount} capitalize='none' multi={false} placeholder='recipe yield...'/>
+        <RecipeInput header='Title:' required={true} value={title} updateInput={setTitle} capitalize='none' multi={false} placeholder='recipe title...'/>
+        <RecipeInput header='Description:' required={true} value={description} updateInput={setDescription} capitalize='none' multi={true} placeholder='recipe description...'/>
+        <RecipeInput header='Yield:' required={true} value={yieldAmount} updateInput={setYieldAmount} capitalize='none' multi={false} placeholder='recipe yield...'/>
         <View style={tailwind`w-full flex flex-row`}>
           <View style={tailwind`w-1/2`}>
-            <RecipeInput header='Prep Time:' value={prepTime} updateInput={setPrepTime} capitalize='none' multi={false} placeholder='recipe prep time...'/>
+            <RecipeInput header='Prep Time:' required={true} value={prepTime} updateInput={setPrepTime} capitalize='none' multi={false} placeholder='recipe prep time...'/>
           </View>
           <View style={tailwind`w-1/2`}>
-            <RecipeInput header='Cook Time:' value={cookTime} updateInput={setCookTime} capitalize='none' multi={false} placeholder='recipe cook time...'/>
+            <RecipeInput header='Cook Time:' required={true} value={cookTime} updateInput={setCookTime} capitalize='none' multi={false} placeholder='recipe cook time...'/>
           </View>
         </View>
-        <SelectVideoFromGallerySq video={recipeMainVideo} updateVideo={setRecipeMainVidoe}/>
+        <View style={tailwind`mt-4 rounded-full`}>
+          <Text style={tailwind`text-2xl font-bold`}>Media</Text>
+          <View style={tailwind`w-full h-1 bg-stone-600`}></View>
+        </View>
+        <SelectImageFromGallerySq required={true} picture={recipeMainImage} updatePicture={setRecipeMainImage}/>
+        <SelectVideoFromGallerySq video={recipeMainVideo} updateVideo={setRecipeMainVidoe} maximize={() => setMaximizeVideo(true)} />
         <View style={tailwind`mt-4 rounded-full`}>
           <Text style={tailwind`text-2xl font-bold`}>Ingredients</Text>
           <View style={tailwind`w-full h-1 bg-stone-600`}></View>
@@ -369,7 +412,7 @@ const CreateRecipeScreen = () => {
           <Text style={tailwind`text-2xl font-bold`}>Additional Info</Text>
           <View style={tailwind`w-full h-1 bg-stone-600`}></View>
         </View>
-        <RecipeInput header='Tips:' value={tip} updateInput={setTip} capitalize='none' multi={true} placeholder='recipe tip and advice...'/>
+        <RecipeInput header='Tips:' required={false} value={tip} updateInput={setTip} capitalize='none' multi={true} placeholder='recipe tip and advice...'/>
         <View style={tailwind`mt-4 rounded-full`}>
           <Text style={tailwind`text-2xl font-bold`}>Nutritional Facts (Optional)</Text>
           <View style={tailwind`w-full h-1 bg-stone-600`}></View>
@@ -382,10 +425,38 @@ const CreateRecipeScreen = () => {
         <CategoriesSelect categoriesArray={categories} cuisines={typesOfFood} updateCuisine={handleUpdateCategory} header='Categories'/>
         <CategortySelect categories={cuisine} cuisines={typesOfCuisine} updateCuisine={setCuisine} header='Cuisine'/>
         <View style={tailwind`mt-4`}>
-          <MainButton header='Create Recipe' clickButton={createRecipe} loading={creatingRecipe}/>
+          <MainButton header='Create Recipe' clickButton={() => {createRecipe()}} loading={creatingRecipe}/>
         </View>
         <View style={tailwind`h-4 w-full`}></View>
       </ScrollView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={maximizeVideo}
+        onRequestClose={() => setMaximizeVideo(false)} // Close the modal
+      >
+        <View style={tailwind`flex-1 justify-center items-center bg-black`}>
+          {
+            recipeMainVideo && (
+              <Video
+                source={{ uri: recipeMainVideo.uri }}
+                style={[tailwind`w-full`, {height: screenHeight }]}
+                resizeMode="contain"
+                controls={true}
+                paused={false}
+                repeat={true}
+              />
+            )
+          }
+          {/* Minimize button */}
+          <TouchableOpacity
+            onPress={() => setMaximizeVideo(false)}
+            style={tailwind`absolute top-19 left-4 h-10 w-10 bg-gray-700 rounded-full flex justify-center items-center`}
+          >
+            <Minimize height={20} width={20} color={'white'}/>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   )
 }

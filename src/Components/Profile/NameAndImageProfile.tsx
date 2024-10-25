@@ -11,8 +11,8 @@ interface NameAndImageProps {
 const NameAndImageProfile: React.FC<NameAndImageProps> = ({username, accountName, profilePicture}) => {
   return (
     <View style={tailwind`flex flex-row items-center`}>
-      <View style={tailwind`h-18 w-18`}>
-        <Image alt='Profile Picture' style={tailwind`h-18 w-18 bg-stone-300 rounded-full`} source={{uri: profilePicture}} />
+      <View style={tailwind`h-16 w-16`}>
+        <Image alt='Profile Picture' style={tailwind`h-16 w-16 bg-stone-300 rounded-full`} source={{uri: profilePicture}} />
       </View>
       <View style={tailwind`ml-4`}>
         <Text style={tailwind`text-xl font-semibold`}>{username}</Text>

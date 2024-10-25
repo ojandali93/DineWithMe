@@ -18,7 +18,7 @@ interface StandardHeaderProps {
   like?: boolean,
   likeStatus?: boolean,
   addLike?: () => void,
-  removeLike?: () => void
+  removeLike?: () => void,
 }
 
 const StandardHeader: React.FC<StandardHeaderProps> = (
@@ -46,11 +46,11 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
     <View style={tailwind`w-full h-18 bg-slate-950 rounded-bl-5 rounded-br-5`}>
       <View style={tailwind`h-full flex flex-row items-center justify-between px-5`}>
         <View style={tailwind`flex flex-row items-center`}>
-          {back && (
-            <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind`mr-1`}>
-              <ChevronLeft height={28} width={28} color={'white'} />
-            </TouchableOpacity>
-          )}
+        {back && (
+          <TouchableOpacity onPress={() => navigation.goBack()} style={tailwind`ml-0 mr-3 flex flex-row items-center`}>
+            <ChevronLeft height={28} width={28} color={'white'} style={tailwind``} />
+          </TouchableOpacity>
+        )}
           <Text style={tailwind`text-2xl text-white font-semibold`}>{header}</Text>
         </View>
         <View style={tailwind`flex flex-row items-center`}>
@@ -65,12 +65,12 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
             </TouchableOpacity>
           )}
           {notifications && (
-            <TouchableOpacity onPress={notificationsClick} style={tailwind`ml-4`}>
+            <TouchableOpacity onPress={favoritesClick} style={tailwind`ml-4`}>
               <Bookmark height={24} width={24} color={'white'} />
             </TouchableOpacity>
           )}
           {favorites && (
-            <TouchableOpacity onPress={favoritesClick} style={tailwind`ml-4`}>
+            <TouchableOpacity onPress={notificationsClick} style={tailwind`ml-4`}>
               <Bell height={24} width={24} color={'white'} />
             </TouchableOpacity>
           )}

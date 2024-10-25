@@ -10,6 +10,8 @@ import ProfileStackNavigation from './ProfileStackNavigation';
 import FeedStackNavigation from './FeedStackNavigation';
 import ExploreScreen from '../Screens/Explore/ExploreScreen';
 import ExploreStackNavigation from './ExploreStackNavigation';
+import ListStackNavigation from './ListStackNavigation';
+import SearchStackNavigation from './SearchStackNavigation';
 
 const Tab = createBottomTabNavigator();
 
@@ -41,7 +43,7 @@ const BottomTabNavigation = () => {
 
         <Tab.Screen
           name="Lists"
-          component={SearchScreen}
+          component={ListStackNavigation}
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({ focused }) => (
@@ -55,7 +57,7 @@ const BottomTabNavigation = () => {
 
         <Tab.Screen
           name="Recipes"
-          component={SearchScreen}
+          component={SearchStackNavigation}
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({ focused }) => (

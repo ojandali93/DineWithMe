@@ -148,7 +148,7 @@ const FeedScreen = () => {
           notifications={true}
           notificationsClick={() => {}}
           favorites={true}
-          favoritesClick={() => {}}
+          favoritesClick={() => {navigation.navigate('FavoritesScreen')}}
         />
         <View style={tailwind`flex-1`}>
           <FlatList

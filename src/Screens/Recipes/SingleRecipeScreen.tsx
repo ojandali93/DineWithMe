@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollView, Text, TextInput, View, KeyboardAvoidingView, TouchableOpacity, Alert, Image } from 'react-native';
+import { ScrollView, Text, TextInput, View, KeyboardAvoidingView, TouchableOpacity, Alert, Image, Modal, Dimensions } from 'react-native';
 import { FeedStackParamList } from '../../Navigation/FeedStackNavigation';
 import tailwind from 'twrnc';
 import StandardHeader from '../../Components/Headers/StandardHeader';
@@ -13,9 +13,10 @@ import IngredientsDetails from '../../Components/Info/IngredientsDetails';
 import CategoriesDetails from '../../Components/Info/CategoriesDetails';
 import NutritionDetails from '../../Components/Info/NutritionDetails';
 import AuthorDetails from '../../Components/Info/AuthorDetails';
-import { ChevronsUp } from 'react-native-feather';
+import { ChevronsUp, Minimize } from 'react-native-feather';
 import supabase from '../../Utils/supabase';
 import { useUser } from '../../Context/UserContext';
+import Video from 'react-native-video';
 
 type SingleRecipeRouteProp = RouteProp<FeedStackParamList, 'SingleRecipeScreen'>;
 
@@ -25,13 +26,18 @@ const SingleRecipeScreen: React.FC = () => {
   const navigation = useNavigation();
   const { currentProfile } = useUser();
 
+
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState<string>('');
   const [allComments, setAllComments] = useState<any[]>([]);
   const [allLikes, setAllLikes] = useState<any[]>([]);
   const [likeStatus, setLikeStatus] = useState<boolean>(false); // Track like status
+  
+  const [maximizeVideo, setMaximizeVideo] = useState<boolean>(false)
 
   const scrollViewRef = useRef(null);
+
+  const screenHeight = Dimensions.get('window').height; // Get screen height
 
   useEffect(() => {
     getComments();
@@ -233,7 +239,7 @@ const SingleRecipeScreen: React.FC = () => {
           cuisine={recipe.Categories[0].cuisine}
           meal={recipe.Categories[0].meal}
         />
-        {recipe.main_video && <DisplayVideoRecipe video={recipe.main_video} />}
+        {recipe.main_video && <DisplayVideoRecipe video={recipe.main_video}  maximize={() => {setMaximizeVideo(true)}}/>}
         <IngredientsDetails instructions={recipe.Ingredients} />
         <InstructionsDetails instructions={recipe.Instructions} />
         <View style={tailwind`my-3`}>
@@ -282,7 +288,7 @@ const SingleRecipeScreen: React.FC = () => {
           </View>
         )}
 
-        <View style={tailwind`h-14 w-full`}></View>
+        <View style={tailwind`h-20 w-full`}></View>
       </ScrollView>
 
       {showCommentInput && (
@@ -301,6 +307,35 @@ const SingleRecipeScreen: React.FC = () => {
           </View>
         </KeyboardAvoidingView>
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={maximizeVideo}
+        onRequestClose={() => setMaximizeVideo(false)} // Close the modal
+      >
+        <View style={tailwind`flex-1 justify-center items-center bg-black`}>
+          {
+            recipe.main_video && (
+              <Video
+                source={{ uri: recipe.main_video }}
+                style={[tailwind`w-full`, {height: screenHeight }]}
+                resizeMode="contain"
+                controls={true}
+                paused={false}
+                repeat={true}
+              />
+            )
+          }
+          {/* Minimize button */}
+          <TouchableOpacity
+            onPress={() => setMaximizeVideo(false)}
+            style={tailwind`absolute top-19 left-4 h-10 w-10 bg-gray-700 rounded-full flex justify-center items-center`}
+          >
+            <Minimize height={20} width={20} color={'white'}/>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
